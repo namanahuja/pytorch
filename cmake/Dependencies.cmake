@@ -866,57 +866,30 @@ include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 # ---[ Python + Numpy
 if(BUILD_PYTHON)
   # If not given a Python installation, then use the current active Python
-  if(NOT PYTHON_EXECUTABLE)
+  if(NOT Python3_EXECUTABLE)
     execute_process(
       COMMAND "which" "python" RESULT_VARIABLE _exitcode OUTPUT_VARIABLE _py_exe)
     if(${_exitcode} EQUAL 0)
       if(NOT MSVC)
-        string(STRIP ${_py_exe} PYTHON_EXECUTABLE)
+        string(STRIP ${_py_exe} Python3_EXECUTABLE)
       endif()
-      message(STATUS "Setting Python to ${PYTHON_EXECUTABLE}")
+      message(STATUS "Setting Python to ${Python3_EXECUTABLE}")
     endif()
   endif()
 
   # Check that Python works
   set(PYTHON_VERSION)
-  if(DEFINED PYTHON_EXECUTABLE)
+  if(DEFINED Python3_EXECUTABLE)
     execute_process(
-        COMMAND "${PYTHON_EXECUTABLE}" "--version"
+        COMMAND "${Python3_EXECUTABLE}" "--version"
         RESULT_VARIABLE _exitcode OUTPUT_VARIABLE PYTHON_VERSION)
     if(NOT _exitcode EQUAL 0)
-      message(FATAL_ERROR "The Python executable ${PYTHON_EXECUTABLE} cannot be run. Make sure that it is an absolute path.")
+      message(FATAL_ERROR "The Python executable ${Python3_EXECUTABLE} cannot be run. Make sure that it is an absolute path.")
     endif()
     if(PYTHON_VERSION)
       string(REGEX MATCH "([0-9]+)\\.([0-9]+)" PYTHON_VERSION ${PYTHON_VERSION})
     endif()
   endif()
-
-  # Seed PYTHON_INCLUDE_DIR and PYTHON_LIBRARY to be consistent with the
-  # executable that we already found (if we didn't actually find an executable
-  # then these will just use "python", but at least they'll be consistent with
-  # each other).
-  if(NOT PYTHON_INCLUDE_DIR)
-    # TODO: Verify that sysconfig isn't inaccurate
-    pycmd_no_exit(_py_inc _exitcode "import sysconfig; print(sysconfig.get_path('include'))")
-    if("${_exitcode}" EQUAL 0 AND IS_DIRECTORY "${_py_inc}")
-      set(PYTHON_INCLUDE_DIR "${_py_inc}")
-      message(STATUS "Setting Python's include dir to ${_py_inc} from sysconfig")
-    else()
-      message(WARNING "Could not set Python's include dir to ${_py_inc} from sysconfig")
-    endif()
-  endif(NOT PYTHON_INCLUDE_DIR)
-
-  if(NOT PYTHON_LIBRARY)
-    pycmd_no_exit(_py_lib _exitcode "import sysconfig; print(sysconfig.get_path('stdlib'))")
-    if("${_exitcode}" EQUAL 0 AND EXISTS "${_py_lib}" AND EXISTS "${_py_lib}")
-      set(PYTHON_LIBRARY "${_py_lib}")
-      if(MSVC)
-        string(REPLACE "Lib" "libs" _py_static_lib ${_py_lib})
-        link_directories(${_py_static_lib})
-      endif()
-      message(STATUS "Setting Python's library to ${PYTHON_LIBRARY}")
-    endif()
-  endif(NOT PYTHON_LIBRARY)
 
   # These should fill in the rest of the variables, like versions, but resepct
   # the variables we set above
@@ -927,10 +900,6 @@ if(BUILD_PYTHON)
       "Python development libraries could not be found.")
   endif()
 
-  if(${Python3_VERSION} VERSION_LESS 3)
-    message(FATAL_ERROR
-      "Found Python libraries version ${Python3_VERSION}. Python 2 has reached end-of-life and is no longer supported by PyTorch.")
-  endif()
   if(${Python3_VERSION} VERSION_LESS 3.8)
     message(FATAL_ERROR
       "Found Python libraries version ${Python3_VERSION}. Python < 3.8 is no longer supported by PyTorch.")
