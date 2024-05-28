@@ -15,8 +15,6 @@ import unittest
 import warnings
 from functools import partial, wraps
 
-import functorch
-
 # NB: numpy is a testing dependency!
 import numpy as np
 import torch
@@ -24,21 +22,6 @@ import torch.autograd.forward_ad as fwAD
 import torch.nn as nn
 import torch.nn.functional as F
 from common_utils import expectedFailureIf
-from functorch import (
-    combine_state_for_ensemble,
-    grad,
-    grad_and_value,
-    hessian,
-    jacfwd,
-    jacrev,
-    jvp,
-    make_functional,
-    make_functional_with_buffers,
-    make_fx,
-    vjp,
-    vmap,
-)
-from functorch.experimental import functionalize, replace_all_batch_norm_modules_
 from torch._C import _ExcludeDispatchKeyGuard, DispatchKey, DispatchKeySet
 from torch._dynamo import allow_in_graph
 from torch._functorch.eager_transforms import _slice_argnums
@@ -67,9 +50,7 @@ from torch.testing._internal.common_dtype import get_all_fp_dtypes
 from torch.testing._internal.common_utils import (
     freeze_rng_state,
     instantiate_parametrized_tests,
-    IS_ARM64,
     IS_FBCODE,
-    IS_MACOS,
     IS_WINDOWS,
     markDynamoStrictTest,
     parametrize,
@@ -82,6 +63,23 @@ from torch.testing._internal.common_utils import (
 )
 
 from torch.utils._pytree import tree_flatten, tree_map, tree_unflatten
+
+import functorch
+from functorch import (
+    combine_state_for_ensemble,
+    grad,
+    grad_and_value,
+    hessian,
+    jacfwd,
+    jacrev,
+    jvp,
+    make_functional,
+    make_functional_with_buffers,
+    make_fx,
+    vjp,
+    vmap,
+)
+from functorch.experimental import functionalize, replace_all_batch_norm_modules_
 
 USE_TORCHVISION = False
 try:
@@ -5082,9 +5080,7 @@ class TestCompileTransforms(TestCase):
     @skipIfRocm(msg="test leaks memory on ROCm")
     # torch.compile is not supported on Windows
     # Triton only supports GPU with SM70 or later.
-    @expectedFailureIf(
-        (IS_ARM64 and not IS_MACOS) or IS_WINDOWS or (TEST_CUDA and not SM70OrLater)
-    )
+    @expectedFailureIf(IS_WINDOWS or (TEST_CUDA and not SM70OrLater))
     def test_compile_vmap_hessian(self, device):
         # The model and inputs are a smaller version
         # of code at benchmark repo:

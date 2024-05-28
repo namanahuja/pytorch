@@ -438,6 +438,13 @@ inductor_all_samples = {
     "mH",
     "rsub",
     "triu",
+    "cummax",
+    "cummin",
+    "_chunk_cat",
+    "constant_pad_nd",
+    "clamp_max",
+    "clamp_min",
+    "ne",
 }
 
 
