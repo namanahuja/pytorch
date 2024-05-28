@@ -94,6 +94,7 @@ class CppWrapperCpu(WrapperCodeGen):
         arg_types=None,
         grid_fn: str = "grid",
         triton_meta=None,
+        grid_extra_kwargs="",
     ):
         """
         Generates kernel call code.
