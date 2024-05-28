@@ -490,6 +490,8 @@ def build_deps():
         rerun_cmake=RERUN_CMAKE,
         cmake_only=CMAKE_ONLY,
         cmake=cmake,
+        build_libtorchless=BUILD_PYTHON_ONLY,
+        libtorch_path= f"{_get_package_path(LIBTORCH_PKG_NAME)}/lib"
     )
 
     if CMAKE_ONLY:
@@ -1180,7 +1182,6 @@ def _main():
         # functorch is not supported without python
         os.environ["BUILD_FUNCTORCH"] = "OFF"
     if BUILD_PYTHON_ONLY:
-        os.environ["BUILD_LIBTORCHLESS"] = "ON"
         os.environ["LIBTORCH_LIB_PATH"] = f"{_get_package_path(LIBTORCH_PKG_NAME)}/lib"
 
     # the list of runtime dependencies required by this built package
