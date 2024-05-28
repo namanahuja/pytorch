@@ -4919,6 +4919,7 @@ class ResizeStorageBytes(MutatingFirstArgExternKernel):
         )
         V.graph.mark_buffer_mutated(variable.get_name())
         self.name = V.graph.register_buffer(self)
+        self.resized_buf_name = variable.get_name()
         self.python_kernel_name = "inductor_ops.resize_storage_bytes_"
         self.cpp_kernel_name = "torch::inductor::resize_storage_bytes_"
         V.graph.never_reuse_buffers.add(variable.data.get_name())
@@ -8221,6 +8222,15 @@ class _CollectiveKernel(FallbackKernel):
         cpp_kernel_name = kernel._name
         python_kernel_name = cpp_kernel_name.replace("::", ".")
         with V.graph.fake_mode:
+            # if kernel is torch.ops._c10d_functional.all_gather_into_tensor_out.default:
+            #     (
+            #         example_output,
+            #         tensor_args,
+            #         non_tensor_args,
+            #         unflatten_args,
+            #         unbacked_bindings,
+            #     ) = cls.process_kernel(kernel, *mutated_inputs, *args, **kwargs)
+            # else:
             (
                 example_output,
                 tensor_args,
